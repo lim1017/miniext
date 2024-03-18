@@ -1,6 +1,5 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
 
 import { /* connectFirestoreEmulator, */ getFirestore } from 'firebase/firestore';
 // import { /* connectStorageEmulator, */ getStorage } from 'firebase/storage';
@@ -22,8 +21,6 @@ const firebaseConfig = {
 
 // Initialize Firebase
 export const firebaseApp = initializeApp(firebaseConfig);
-
-export const firebaseAuth = getAuth(firebaseApp);
 
 export const firestore = getFirestore(firebaseApp);
 export const baseBucketName = 'miniext-lim1017.appspot.com';

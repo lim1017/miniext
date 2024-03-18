@@ -1,8 +1,10 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
+    ConfirmationResult,
     PhoneAuthProvider,
     RecaptchaVerifier,
     linkWithPhoneNumber,
+    signInWithPhoneNumber,
     updatePhoneNumber,
 } from 'firebase/auth';
 import { getFriendlyMessageFromFirebaseErrorCode } from './helpers';
@@ -21,9 +23,14 @@ export const sendVerificationCode = createAsyncThunk(
             auth: AuthContextType;
             recaptchaResolved: boolean;
             recaptcha: RecaptchaVerifier | null;
+            isPhoneSignUp: boolean;
             callback: (
                 args:
-                    | { type: 'success'; verificationId: string }
+                    | {
+                          type: 'success';
+                          verificationId: string;
+                          confirmationResult?: ConfirmationResult;
+                      }
                     | {
                           type: 'error';
                           message: string;
@@ -32,7 +39,7 @@ export const sendVerificationCode = createAsyncThunk(
         },
         { dispatch }
     ) => {
-        if (args.auth.type !== LoadingStateTypes.LOADED) return;
+        if (!args.isPhoneSignUp && args.auth.type !== LoadingStateTypes.LOADED) return;
         if (!args.recaptchaResolved || !args.recaptcha) {
             dispatch(showToast({ message: 'First Resolved the Captcha', type: 'info' }));
             return;
@@ -48,24 +55,45 @@ export const sendVerificationCode = createAsyncThunk(
         }
 
         try {
-            const sentConfirmationCode = await linkWithPhoneNumber(
-                args.auth.user,
-                args.phoneNumber,
-                args.recaptcha
-            );
-            dispatch(
-                showToast({
-                    message: 'Verification Code has been sent to your Phone',
-                    type: 'success',
-                })
-            );
+            if (args.isPhoneSignUp) {
+                // Use signInWithPhoneNumber for sign-up flow
+                const confirmationResult = await signInWithPhoneNumber(
+                    firebaseAuth,
+                    args.phoneNumber,
+                    args.recaptcha
+                );
+                // Here, you might want to handle the confirmationResult, like storing it for later use
+                dispatch(
+                    showToast({ message: 'Verification code sent to your phone.', type: 'success' })
+                );
 
-            if (args.callback)
-                args.callback({
-                    type: 'success',
-                    verificationId: sentConfirmationCode.verificationId,
-                });
+                if (args.callback)
+                    args.callback({
+                        type: 'success',
+                        verificationId: confirmationResult.verificationId,
+                        confirmationResult,
+                    });
+            } else {
+                const sentConfirmationCode = await linkWithPhoneNumber(
+                    args.auth.user,
+                    args.phoneNumber,
+                    args.recaptcha
+                );
+                dispatch(
+                    showToast({
+                        message: 'Verification Code has been sent to your Phone',
+                        type: 'success',
+                    })
+                );
+
+                if (args.callback)
+                    args.callback({
+                        type: 'success',
+                        verificationId: sentConfirmationCode.verificationId,
+                    });
+            }
         } catch (error: any) {
+            console.log(error);
             dispatch(
                 showToast({
                     message: getFriendlyMessageFromFirebaseErrorCode(error.code),
@@ -93,6 +121,8 @@ export const verifyPhoneNumber = createAsyncThunk(
             OTPCode: string;
             auth: AuthContextType;
             verificationId: string;
+            confirmationResult: ConfirmationResult | null;
+            isPhoneSignUp: boolean;
             callback: (
                 args:
                     | { type: 'success' }
@@ -107,25 +137,44 @@ export const verifyPhoneNumber = createAsyncThunk(
         if (
             args.OTPCode === null ||
             !args.verificationId ||
-            args.auth.type !== LoadingStateTypes.LOADED
+            (!args.isPhoneSignUp && args.auth.type !== LoadingStateTypes.LOADED)
         )
             return;
 
         try {
             const credential = PhoneAuthProvider.credential(args.verificationId, args.OTPCode);
-            await updatePhoneNumber(args.auth.user, credential);
+            console.log(args, 'from verify phone number');
+            console.log(credential, 'from verify phone number');
+            if (args.isPhoneSignUp && args.confirmationResult) {
+                console.log(args.confirmationResult, 'from confirmation result');
 
-            firebaseAuth.currentUser?.reload();
+                // verify code and creates the user
+                const userCredential = await args.confirmationResult.confirm(args.OTPCode);
+                console.log(userCredential, 'from user credential');
+                firebaseAuth.currentUser?.reload();
 
-            dispatch(
-                showToast({
-                    message: 'Logged in Successfully',
-                    type: 'success',
-                })
-            );
+                dispatch(
+                    showToast({
+                        message: 'User created and signed in successfully.',
+                        type: 'success',
+                    })
+                );
 
-            args.callback({ type: 'success' });
+                args.callback({ type: 'success' });
+            } else {
+                await updatePhoneNumber(args.auth.user, credential);
+                firebaseAuth.currentUser?.reload();
+                dispatch(
+                    showToast({
+                        message: 'Logged in Successfully',
+                        type: 'success',
+                    })
+                );
+
+                args.callback({ type: 'success' });
+            }
         } catch (error: any) {
+            console.log(error);
             dispatch(
                 showToast({
                     message: getFriendlyMessageFromFirebaseErrorCode(error.code),

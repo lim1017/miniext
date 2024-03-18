@@ -17,3 +17,13 @@ export interface LoadedState {
     type: 'loaded';
     data: any;
 }
+
+export enum SignUpMethod {
+    Email = 'email',
+    Phone = 'phone',
+}
+
+export const enum AuthenticationAction {
+    Login = 'login',
+    SignUp = 'sign-up',
+}

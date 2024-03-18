@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import { RecaptchaVerifier } from 'firebase/auth';
+import { ConfirmationResult, RecaptchaVerifier } from 'firebase/auth';
 import { firebaseAuth } from '@/components/firebase/firebaseAuth';
 import { useEffect, useState } from 'react';
 import Modal from '@/components/ui/Modal';
@@ -18,11 +18,18 @@ import {
     useVerifyPhoneNumberLoading,
     verifyPhoneNumber,
 } from '../redux/auth/verifyPhoneNumber';
+interface PhoneVerificationProps {
+    signUpPhone?: string;
+}
+/**
+ * PhoneVerification component is used to verify a phone number during the sign-up or login process.
+ * When signing up with a phone number signUpPhone prop is provided.
+ */
 
-const PhoneVerification = () => {
+const PhoneVerification = ({ signUpPhone }: PhoneVerificationProps) => {
     const dispatch = useAppDispatch();
     const auth = useAuth();
-    const [phoneNumber, setPhoneNumber] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState(signUpPhone || '');
     const [OTPCode, setOTPCode] = useState('');
     const [show, setShow] = useState(false);
 
@@ -34,9 +41,12 @@ const PhoneVerification = () => {
     const [verificationId, setVerificationId] = useState('');
     const router = useRouter();
 
+    const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+
     // Sending OTP and storing id to verify it later
     const handleSendVerification = async () => {
-        if (auth.type !== LoadingStateTypes.LOADED) return;
+        // Skip the check if signUpPhone is defined
+        if (!signUpPhone && auth.type !== LoadingStateTypes.LOADED) return;
 
         dispatch(
             sendVerificationCode({
@@ -44,10 +54,16 @@ const PhoneVerification = () => {
                 auth,
                 recaptcha,
                 recaptchaResolved,
+                isPhoneSignUp: signUpPhone ? true : false,
                 callback: (result) => {
+                    console.log(result, 'from send verification callback');
                     if (result.type === 'error') {
                         setRecaptchaResolved(false);
                         return;
+                    }
+
+                    if (result.confirmationResult) {
+                        setConfirmationResult(result.confirmationResult);
                     }
                     setVerificationId(result.verificationId);
                     setShow(true);
@@ -58,12 +74,14 @@ const PhoneVerification = () => {
 
     // Validating the filled OTP by user
     const ValidateOtp = async () => {
-        if (auth.type !== LoadingStateTypes.LOADED) return;
+        if ((!signUpPhone && auth.type !== LoadingStateTypes.LOADED) || !recaptcha) return;
         dispatch(
             verifyPhoneNumber({
                 auth,
                 OTPCode,
                 verificationId,
+                confirmationResult,
+                isPhoneSignUp: signUpPhone ? true : false,
                 callback: (result) => {
                     if (result.type === 'error') {
                         return;
