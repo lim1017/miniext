@@ -4,66 +4,94 @@ import { useAppDispatch } from '../redux/store';
 import LoadingButton from './LoadingButton';
 import LoginWithGoogleButton from './LoginWithGoogleButton';
 import Input from './Input';
-import { isEmail } from 'validator';
+import { isEmail, isMobilePhone } from 'validator'; // Assuming isMobilePhone is available for phone validation
 import { loginWithEmail, useIsLoginWithEmailLoading } from '../redux/auth/loginWithEmail';
+import BasicButton from './BasicButton';
 
 interface SignUpModalProps {
     open: boolean;
     setOpen: (show: boolean) => void;
 }
-const SignUpModal = (props: SignUpModalProps) => {
+
+enum SignUpMethod {
+    Email = 'email',
+    Phone = 'phone',
+}
+
+const SignUpModal = ({ open, setOpen }: SignUpModalProps) => {
     const dispatch = useAppDispatch();
 
     const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
+    const [method, setMethod] = useState<SignUpMethod>(SignUpMethod.Email);
     const [disableSubmit, setDisableSubmit] = useState(true);
     const isLoading = useIsLoginWithEmailLoading();
 
     useEffect(() => {
-        if (isEmail(email) && password.length >= 6) {
+        if (
+            ((method === 'email' && isEmail(email)) ||
+                (method === 'phone' && isMobilePhone(phone))) &&
+            password.length >= 6
+        ) {
             setDisableSubmit(false);
         } else {
             setDisableSubmit(true);
         }
-    }, [email, password]);
+    }, [email, phone, password, method]);
 
-    // Signup with email and password and redirecting to home page
-    const signUpWithEmail = useCallback(async () => {
-        // verify the user email before signup
-        dispatch(
-            loginWithEmail({
-                type: 'sign-up',
-                email,
-                password,
-            })
-        );
-
-        /* if (credentials.user.emailVerified === false) {
-                await sendEmailVerification(credentials.user);
-
-                dispatch(
-                    showToast({
-                        message: 'Verification Email has been sent to your Email',
-                        type: 'success',
-                    })
-                );
-            } */
-
-        /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    }, [email, password, dispatch]);
+    const signUp = useCallback(async () => {
+        if (method === SignUpMethod.Email) {
+            // Perform email sign-up
+            dispatch(loginWithEmail({ type: 'sign-up', email, password }));
+        } else {
+            // Perform phone sign-up
+            // You would need a phone sign-up function similar to loginWithEmail
+        }
+    }, [email, phone, password, method, dispatch]);
 
     return (
-        <Modal show={props.open} setShow={props.setOpen}>
+        <Modal show={open} setShow={setOpen}>
             <div className="max-w-md w-full bg-white py-6 rounded-lg">
                 <h2 className="text-lg font-semibold text-center mb-10">Sign Up</h2>
                 <div className="px-4 flex p-4 pb-10 gap-4 flex-col">
-                    <Input
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Email"
-                        name="email"
-                        type="text"
-                    />
+                    <div className="flex justify-center mb-4">
+                        <BasicButton
+                            onClick={() => setMethod(SignUpMethod.Email)}
+                            className={`mr-2 ${
+                                method === SignUpMethod.Email
+                                    ? 'bg-blue-500 text-white'
+                                    : 'bg-gray-200'
+                            }`}
+                        >
+                            Emails
+                        </BasicButton>
+                        <BasicButton
+                            onClick={() => setMethod(SignUpMethod.Phone)}
+                            className={`ml-2 ${
+                                method === 'phone' ? 'bg-blue-500 text-white' : 'bg-gray-200'
+                            }`}
+                        >
+                            Phone
+                        </BasicButton>
+                    </div>
+                    {method === SignUpMethod.Email ? (
+                        <Input
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="Email"
+                            name="email"
+                            type="text"
+                        />
+                    ) : (
+                        <Input
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            placeholder="Phone"
+                            name="phone"
+                            type="text"
+                        />
+                    )}
                     <Input
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
@@ -71,11 +99,7 @@ const SignUpModal = (props: SignUpModalProps) => {
                         name="password"
                         type="password"
                     />
-                    <LoadingButton
-                        onClick={signUpWithEmail}
-                        disabled={disableSubmit}
-                        loading={isLoading}
-                    >
+                    <LoadingButton onClick={signUp} disabled={disableSubmit} loading={isLoading}>
                         Sign Up
                     </LoadingButton>
                     <div className="relative">
