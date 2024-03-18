@@ -8,6 +8,7 @@ import PhoneVerification from '@/components/ui/PhoneVerification';
 import { useHomePage } from '@/components/redux/homePage/homePageSelectors';
 import { fetchHomePageData } from '@/components/redux/homePage/fetchHomePageData';
 import { useAppDispatch } from '@/components/redux/store';
+import EmailVerification from '@/components/ui/EmailVerification';
 
 export function Home() {
     const dispatch = useAppDispatch();
@@ -19,6 +20,26 @@ export function Home() {
         dispatch(fetchHomePageData());
     }, []);
 
+    const getVerificationComponent = () => {
+        // Check if the user is loaded and available
+        if (auth.type !== LoadingStateTypes.LOADED || auth.user == null) {
+            return null; // or some loading indicator
+        }
+
+        // User is loaded and has no phone number, show PhoneVerification
+        if (auth.user.phoneNumber == null) {
+            return <PhoneVerification />;
+        }
+
+        // User is loaded and has no email, show EmailVerification
+        if (auth.user.email == null) {
+            return <EmailVerification />;
+        }
+
+        return false;
+    };
+    const VerificationComponent = getVerificationComponent();
+
     return (
         <div className={styles.container}>
             <Head>
@@ -26,10 +47,8 @@ export function Home() {
                 <link rel="icon" href="/favicon.ico" />
             </Head>
 
-            {auth.type === LoadingStateTypes.LOADED &&
-            auth.user != null &&
-            auth.user.phoneNumber == null ? (
-                <PhoneVerification />
+            {VerificationComponent ? (
+                VerificationComponent
             ) : (
                 <main className={styles.main}>
                     <h1 className={styles.title}>

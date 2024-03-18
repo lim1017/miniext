@@ -45,9 +45,8 @@ const SignUpModal = ({ open, setOpen }: SignUpModalProps) => {
             dispatch(loginWithEmail({ type: AuthenticationAction.SignUp, email, password }));
         } else {
             setShowPhoneVerification(true);
-            // dispatch(loginWithPhone({ type: AuthenticationAction.SignUp, phone, password }));
         }
-    }, [email, phone, password, method, dispatch]);
+    }, [email, password, method, dispatch]);
 
     return (
         <Modal show={open} setShow={setOpen}>
