@@ -1,25 +1,24 @@
-import { useState } from 'react';
-import Input from './Input';
-import LoadingButton from './LoadingButton';
-import { verifyEmail } from '../redux/auth/verifyEmail';
+import { useVerifyEmailLoading } from '../redux/auth/verifyEmail';
 import { useAuth } from '../useAuth';
 import { useRouter } from 'next/navigation';
-import { LoadingStateTypes } from '../redux/types';
+import { AuthenticationAction, LoadingStateTypes } from '../redux/types';
 import { useAppDispatch } from '@/components/redux/store';
+import { EmailPasswordInputs } from './EmailPasswordInputs';
+import { loginWithEmail } from '../redux/auth/loginWithEmail';
 
 const EmailVerification = () => {
-    const [email, setEmail] = useState('');
     const auth = useAuth();
     const router = useRouter();
     const dispatch = useAppDispatch();
-
-    const handleSubmitEmail = () => {
+    const emailVerifyLoading = useVerifyEmailLoading();
+    const handleSubmitEmail = (email: string, password: string) => {
         if (auth.type !== LoadingStateTypes.LOADED) return;
-
+        // TODO decide if we use verifyEMAIL or try to reuse loginWithEmail...
         dispatch(
-            verifyEmail({
+            loginWithEmail({
+                type: AuthenticationAction.Link,
                 email,
-                auth,
+                password,
                 callback: (result) => {
                     if (result.type === 'error') {
                         return;
@@ -30,6 +29,7 @@ const EmailVerification = () => {
             })
         );
     };
+
     return (
         <div className="flex items-center justify-center min-h-full px-4 py-12 sm:px-6 lg:px-8">
             <div className="w-full max-w-md space-y-8">
@@ -45,20 +45,11 @@ const EmailVerification = () => {
                 </div>
                 <div className="max-w-xl w-full rounded overflow-hidden shadow-lg py-2 px-4">
                     <div className="px-4 flex p-4 pb-10 gap-4 flex-col">
-                        <Input
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="Email"
-                            name="email"
-                            type="text"
+                        <EmailPasswordInputs
+                            isLoading={emailVerifyLoading}
+                            onSubmit={handleSubmitEmail}
+                            btnText="Submit"
                         />
-                        <LoadingButton
-                            onClick={handleSubmitEmail}
-                            loading={false}
-                            loadingText="Sending OTP"
-                        >
-                            Submit
-                        </LoadingButton>
                     </div>
                 </div>
             </div>

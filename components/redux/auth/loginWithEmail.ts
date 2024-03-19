@@ -1,14 +1,37 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import {
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    EmailAuthProvider,
+    linkWithCredential,
+} from 'firebase/auth';
 import { firebaseAuth } from '@/components/firebase/firebaseAuth';
 import { getFriendlyMessageFromFirebaseErrorCode } from './helpers';
 import { showToast } from '../toast/toastSlice';
 import isEmail from 'validator/lib/isEmail';
 import { useAppSelector } from '../store';
+import { AuthenticationAction } from '../types';
 
 export const loginWithEmail = createAsyncThunk(
     'login',
-    async (args: { type: 'login' | 'sign-up'; email: string; password: string }, { dispatch }) => {
+    async (
+        args: {
+            type: AuthenticationAction;
+            email: string;
+            password: string;
+            callback?: (
+                args:
+                    | {
+                          type: 'success';
+                      }
+                    | {
+                          type: 'error';
+                          message: string;
+                      }
+            ) => void;
+        },
+        { dispatch }
+    ) => {
         try {
             if (!isEmail(args.email)) {
                 dispatch(
@@ -29,11 +52,31 @@ export const loginWithEmail = createAsyncThunk(
                 return;
             }
 
-            if (args.type === 'sign-up') {
+            if (args.type === AuthenticationAction.SignUp) {
                 await createUserWithEmailAndPassword(firebaseAuth, args.email, args.password);
             }
 
-            await signInWithEmailAndPassword(firebaseAuth, args.email, args.password);
+            if (args.type === AuthenticationAction.Link) {
+                const user = firebaseAuth.currentUser;
+                // Create an email/password credential
+                const credential = EmailAuthProvider.credential(args.email, args.password);
+
+                try {
+                    if (user) {
+                        const usercred = await linkWithCredential(user, credential);
+                        console.log('Email and password linked to the account', usercred.user);
+
+                        if (args.callback)
+                            args.callback({
+                                type: 'success',
+                            });
+                    }
+                } catch (error) {
+                    console.error('Error linking email and password to the account', error);
+                }
+            } else {
+                await signInWithEmailAndPassword(firebaseAuth, args.email, args.password);
+            }
         } catch (e: any) {
             dispatch(
                 showToast({

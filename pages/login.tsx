@@ -12,7 +12,7 @@ import Input from '@/components/ui/Input';
 import LoadingButton from '@/components/ui/LoadingButton';
 import SignUpModal from '@/components/ui/SignUpModal';
 import { loginWithEmail, useIsLoginWithEmailLoading } from '@/components/redux/auth/loginWithEmail';
-import { LoadingStateTypes } from '@/components/redux/types';
+import { AuthenticationAction, LoadingStateTypes } from '@/components/redux/types';
 
 export const googleLoginProvider = new GoogleAuthProvider();
 
@@ -41,7 +41,7 @@ const LoginPage: NextPage = () => {
     const signInWithEmail = useCallback(async () => {
         await dispatch(
             loginWithEmail({
-                type: 'login',
+                type: AuthenticationAction.Login,
                 email,
                 password,
             })

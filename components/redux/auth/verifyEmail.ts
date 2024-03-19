@@ -1,13 +1,15 @@
 import { AuthContextType } from '@/components/useAuth';
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { getAuth, updateEmail } from 'firebase/auth';
+import { getAuth, updateEmail, sendEmailVerification } from 'firebase/auth';
 import { handleError } from './helpers';
+import { useAppSelector } from '../store';
 
 export const verifyEmail = createAsyncThunk(
     'verifyEmail',
     async (
         args: {
             email: string;
+            password: string;
             auth: AuthContextType;
             callback: (
                 args:
@@ -27,8 +29,10 @@ export const verifyEmail = createAsyncThunk(
             const user = auth.currentUser;
 
             if (user) {
-                console.log(user, args.email);
-                await updateEmail(user, args.email);
+                console.log('update email');
+                const updatedUser = await updateEmail(user, args.email);
+                console.log(user, updatedUser, 'before send email verification');
+                await sendEmailVerification(user);
 
                 if (args.callback)
                     args.callback({
@@ -47,3 +51,8 @@ export const verifyEmail = createAsyncThunk(
         }
     }
 );
+
+export const useVerifyEmailLoading = () => {
+    const loading = useAppSelector((state) => state.loading.verifyEmail);
+    return loading;
+};

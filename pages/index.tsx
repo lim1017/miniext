@@ -39,6 +39,7 @@ export function Home() {
         return false;
     };
     const VerificationComponent = getVerificationComponent();
+    console.log(auth);
 
     return (
         <div className={styles.container}>

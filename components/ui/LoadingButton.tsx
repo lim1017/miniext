@@ -1,9 +1,10 @@
-import { ButtonHTMLAttributes } from 'react';
+import { ButtonHTMLAttributes, MouseEventHandler } from 'react';
 import Spinner from '../Spinner';
 
-interface LoadingButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface LoadingButtonProps<T> {
     loading?: boolean;
     loadingText?: string;
+    onClick?: (event: T) => void;
 }
 
 /**
@@ -12,23 +13,38 @@ interface LoadingButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
  * @param props.loadingText Optional string to replace the loading spinner with text
  * @returns
  */
-const LoadingButton = (props: LoadingButtonProps) => {
+const LoadingButton = <T extends ButtonHTMLAttributes<HTMLButtonElement>>({
+    loading,
+    loadingText,
+    children,
+    onClick,
+    ...buttonProps
+}: LoadingButtonProps<T> & ButtonHTMLAttributes<HTMLButtonElement>) => {
+    // Type the event handler appropriately
+    const handleClick = (event: T) => {
+        if (onClick) {
+            onClick(event);
+        }
+    };
+
     return (
         <button
-            className="transition-colors bg-violet-600 text-white font-medium px-4 py-2 rounded-md hover:bg-violet-700 disabled:bg-violet-400"
-            disabled={props.loading || props.disabled}
-            {...props}
+            className="transition-colors bg-violet-600 text-white font-medium px-4 py-2 rounded-md hover:bg-violet-700 disabled:bg-gray-300"
+            disabled={loading || buttonProps.disabled}
+            // TODO fix type issue
+            onClick={handleClick as unknown as (e: MouseEventHandler<HTMLButtonElement>) => void}
+            {...buttonProps}
         >
-            {props.loading ? (
-                props.loadingText ? (
-                    props.loadingText
+            {loading ? (
+                loadingText ? (
+                    loadingText
                 ) : (
                     <div className="w-full flex items-center justify-center">
                         <Spinner theme="dark" />
                     </div>
                 )
             ) : (
-                props.children
+                children
             )}
         </button>
     );

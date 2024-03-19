@@ -26,4 +26,5 @@ export enum SignUpMethod {
 export const enum AuthenticationAction {
     Login = 'login',
     SignUp = 'sign-up',
+    Link = 'link',
 }
