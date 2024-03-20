@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import Input from './Input';
-import LoadingButton from './LoadingButton';
+import Input from '../Input';
+import LoadingButton from '../LoadingButton';
 import { isEmail } from 'validator';
 
 interface EmailPasswordInputProps {

@@ -55,8 +55,8 @@ export const sendVerificationCode = createAsyncThunk(
         }
 
         try {
+            // registers the user with phone
             if (args.isPhoneSignUp) {
-                // Use signInWithPhoneNumber for sign-up flow
                 const confirmationResult = await signInWithPhoneNumber(
                     firebaseAuth,
                     args.phoneNumber,
@@ -74,6 +74,7 @@ export const sendVerificationCode = createAsyncThunk(
                         confirmationResult,
                     });
             } else {
+                // links the user phone to email
                 const sentConfirmationCode = await linkWithPhoneNumber(
                     args.auth.user,
                     args.phoneNumber,
@@ -103,6 +104,7 @@ export const useSendVerificationCodeLoading = () => {
     return loading;
 };
 
+// verifictaionId for login, confirmationResult for signup
 export const verifyPhoneNumber = createAsyncThunk(
     'verifyPhoneNumber',
     async (

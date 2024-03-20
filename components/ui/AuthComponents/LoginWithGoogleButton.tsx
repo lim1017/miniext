@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import GoogleGLogo from '@/public/statics/images/google-g-logo.svg';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { firebaseAuth } from '../firebase/firebaseAuth';
+import { firebaseAuth } from '../../firebase/firebaseAuth';
 
 const provider = new GoogleAuthProvider();
 

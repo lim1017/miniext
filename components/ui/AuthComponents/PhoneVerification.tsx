@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import { ConfirmationResult, RecaptchaVerifier } from 'firebase/auth';
 import { firebaseAuth } from '@/components/firebase/firebaseAuth';
 import { useEffect, useState } from 'react';
@@ -9,15 +8,17 @@ import { useAppDispatch } from '@/components/redux/store';
 import { showToast } from '@/components/redux/toast/toastSlice';
 import Input from '@/components/ui/Input';
 import LoadingButton from '@/components/ui/LoadingButton';
-import Logout from './Logout';
-import { useAuth } from '../useAuth';
-import { LoadingStateTypes } from '../redux/types';
+import Logout from '../Logout';
+import { useAuth } from '../../useAuth';
+import { LoadingStateTypes } from '../../redux/types';
 import {
     sendVerificationCode,
     useSendVerificationCodeLoading,
     useVerifyPhoneNumberLoading,
     verifyPhoneNumber,
-} from '../redux/auth/verifyPhoneNumber';
+} from '../../redux/auth/verifyPhoneNumber';
+import { LogoHeader } from '../LogoHeader';
+import { PhoneAuthInputs } from './PhoneAuthInputs';
 interface PhoneVerificationProps {
     signUpPhone?: string;
 }
@@ -45,7 +46,7 @@ const PhoneVerification = ({ signUpPhone }: PhoneVerificationProps) => {
 
     // Sending OTP and storing id to verify it later
     const handleSendVerification = async () => {
-        // Skip the check if signUpPhone is defined
+        // Skip the check if signUpPhone is defined as the user will not have been authenticated
         if (!signUpPhone && auth.type !== LoadingStateTypes.LOADED) return;
 
         dispatch(
@@ -56,7 +57,6 @@ const PhoneVerification = ({ signUpPhone }: PhoneVerificationProps) => {
                 recaptchaResolved,
                 isPhoneSignUp: signUpPhone ? true : false,
                 callback: (result) => {
-                    console.log(result, 'from send verification callback');
                     if (result.type === 'error') {
                         setRecaptchaResolved(false);
                         return;
@@ -72,7 +72,6 @@ const PhoneVerification = ({ signUpPhone }: PhoneVerificationProps) => {
         );
     };
 
-    // Validating the filled OTP by user
     const ValidateOtp = async () => {
         if ((!signUpPhone && auth.type !== LoadingStateTypes.LOADED) || !recaptcha) return;
         dispatch(
@@ -118,34 +117,21 @@ const PhoneVerification = ({ signUpPhone }: PhoneVerificationProps) => {
     }, []);
 
     return (
-        <div className="flex items-center justify-center min-h-full px-4 py-12 sm:px-6 lg:px-8">
-            <div className="w-full max-w-md space-y-8">
+        <div className="flex items-center justify-center min-h-full px-4 py-6 sm:px-6 lg:px-8">
+            <div className="w-full max-w-md space-y-4">
                 <div>
-                    <img
-                        className="w-auto h-12 mx-auto"
-                        src="https://tailwindui.com/img/logos/workflow-mark-indigo-600.svg"
-                        alt="Workflow"
-                    />
-                    <h2 className="mt-6 text-3xl font-extrabold text-center text-gray-900">
-                        Sign in to your account
-                    </h2>
+                    <LogoHeader header="Phone Verification" />
                 </div>
 
                 <div className="max-w-xl w-full rounded overflow-hidden shadow-lg py-2 px-4">
                     <div className="px-4 flex p-4 pb-10 gap-4 flex-col">
-                        <Input
-                            value={phoneNumber}
-                            onChange={(e) => setPhoneNumber(e.target.value)}
-                            placeholder="phone number"
-                            type="text"
-                        />
-                        <LoadingButton
-                            onClick={handleSendVerification}
+                        <PhoneAuthInputs
+                            phone={phoneNumber}
+                            setPhone={setPhoneNumber}
                             loading={sendVerificationLoading}
-                            loadingText="Sending OTP"
-                        >
-                            Send OTP
-                        </LoadingButton>
+                            btnText="Send OTP"
+                            onSubmit={handleSendVerification}
+                        />
                     </div>
                     <div id="recaptcha-container" />
                     <div className="flex w-full flex-col">
@@ -157,7 +143,7 @@ const PhoneVerification = ({ signUpPhone }: PhoneVerificationProps) => {
                             <h2 className="text-lg font-semibold text-center mb-10">
                                 Enter Code to Verify
                             </h2>
-                            <div className="px-4 flex items-center gap-4 pb-10">
+                            <div className="px-4 flex justify-center items-center gap-4 pb-10">
                                 <Input
                                     value={OTPCode}
                                     type="text"

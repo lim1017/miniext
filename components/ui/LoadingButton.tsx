@@ -1,10 +1,9 @@
-import { ButtonHTMLAttributes, MouseEventHandler } from 'react';
+import { ButtonHTMLAttributes } from 'react';
 import Spinner from '../Spinner';
 
-interface LoadingButtonProps<T> {
+interface LoadingButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     loading?: boolean;
     loadingText?: string;
-    onClick?: (event: T) => void;
 }
 
 /**
@@ -13,28 +12,19 @@ interface LoadingButtonProps<T> {
  * @param props.loadingText Optional string to replace the loading spinner with text
  * @returns
  */
-const LoadingButton = <T extends ButtonHTMLAttributes<HTMLButtonElement>>({
+const LoadingButton = ({
+    className,
     loading,
     loadingText,
     children,
-    onClick,
     ...buttonProps
-}: LoadingButtonProps<T> & ButtonHTMLAttributes<HTMLButtonElement>) => {
-    // Type the event handler appropriately
-    const handleClick = (event: T) => {
-        if (onClick) {
-            onClick(event);
-        }
-    };
+}: LoadingButtonProps) => {
+    const classNames = `transition-colors bg-violet-600 text-white font-medium px-4 py-2 rounded-md hover:bg-violet-700 disabled:bg-gray-300 ${
+        className || ''
+    }`;
 
     return (
-        <button
-            className="transition-colors bg-violet-600 text-white font-medium px-4 py-2 rounded-md hover:bg-violet-700 disabled:bg-gray-300"
-            disabled={loading || buttonProps.disabled}
-            // TODO fix type issue
-            onClick={handleClick as unknown as (e: MouseEventHandler<HTMLButtonElement>) => void}
-            {...buttonProps}
-        >
+        <button {...buttonProps} className={classNames} disabled={loading || buttonProps.disabled}>
             {loading ? (
                 loadingText ? (
                     loadingText

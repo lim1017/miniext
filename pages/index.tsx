@@ -4,11 +4,11 @@ import { AuthGuard, useAuth } from '@/components/useAuth';
 import Logout from '@/components/ui/Logout';
 import { useEffect } from 'react';
 import { LoadingStateTypes } from '@/components/redux/types';
-import PhoneVerification from '@/components/ui/PhoneVerification';
+import PhoneVerification from '@/components/ui/AuthComponents/PhoneVerification';
 import { useHomePage } from '@/components/redux/homePage/homePageSelectors';
 import { fetchHomePageData } from '@/components/redux/homePage/fetchHomePageData';
 import { useAppDispatch } from '@/components/redux/store';
-import EmailVerification from '@/components/ui/EmailVerification';
+import EmailVerification from '@/components/ui/AuthComponents/EmailVerification';
 
 export function Home() {
     const dispatch = useAppDispatch();
@@ -55,7 +55,9 @@ export function Home() {
                     <h1 className={styles.title}>
                         Welcome to <a href="https://nextjs.org">Next.js!</a>
                     </h1>
-
+                    <h2 className="text-2xl mt-4 mb-4 font-bold text-green-900">
+                        HELLO 👋👋 {auth.user?.email} -- {auth.user?.phoneNumber}
+                    </h2>
                     <p className={styles.description}>
                         Get started by editing{` `}
                         <code className={styles.code}>pages/index.js</code>
