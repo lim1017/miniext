@@ -1,7 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { loginWithEmail } from '../auth/loginWithEmail';
 import { sendVerificationCode, verifyPhoneNumber } from '../auth/verifyPhoneNumber';
-import { verifyEmail } from '../auth/verifyEmail';
 
 export interface LoadingStates {
     [key: string]: boolean;
@@ -48,16 +47,6 @@ export const loadingSlice = createSlice({
         });
         builder.addCase(verifyPhoneNumber.rejected, (state) => {
             state.verifyPhoneNumber = false;
-        });
-        // Verify Email
-        builder.addCase(verifyEmail.pending, (state) => {
-            state.verifyEmail = true;
-        });
-        builder.addCase(verifyEmail.fulfilled, (state) => {
-            state.verifyEmail = false;
-        });
-        builder.addCase(verifyEmail.rejected, (state) => {
-            state.verifyEmail = false;
         });
     },
 });

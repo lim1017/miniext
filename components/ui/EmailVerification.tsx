@@ -1,19 +1,17 @@
-import { useVerifyEmailLoading } from '../redux/auth/verifyEmail';
 import { useAuth } from '../useAuth';
 import { useRouter } from 'next/navigation';
 import { AuthenticationAction, LoadingStateTypes } from '../redux/types';
 import { useAppDispatch } from '@/components/redux/store';
 import { EmailPasswordInputs } from './EmailPasswordInputs';
-import { loginWithEmail } from '../redux/auth/loginWithEmail';
+import { loginWithEmail, useIsLoginWithEmailLoading } from '../redux/auth/loginWithEmail';
 
 const EmailVerification = () => {
     const auth = useAuth();
     const router = useRouter();
     const dispatch = useAppDispatch();
-    const emailVerifyLoading = useVerifyEmailLoading();
+    const emailVerifyLoading = useIsLoginWithEmailLoading();
     const handleSubmitEmail = (email: string, password: string) => {
         if (auth.type !== LoadingStateTypes.LOADED) return;
-        // TODO decide if we use verifyEMAIL or try to reuse loginWithEmail...
         dispatch(
             loginWithEmail({
                 type: AuthenticationAction.Link,
