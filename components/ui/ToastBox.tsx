@@ -9,7 +9,7 @@ export default function ToastBox() {
     useEffect(() => {
         const timeId = setTimeout(() => {
             dispatch(hideToast());
-        }, 2000);
+        }, 5000);
 
         return () => clearTimeout(timeId);
     }, [toast, dispatch]);

@@ -7,6 +7,8 @@ import LoginWithGoogleButton from './LoginWithGoogleButton';
 import { PhoneAuthInputs } from './PhoneAuthInputs';
 import PhoneVerification from './PhoneVerification';
 import { useAppDispatch } from '@/components/redux/store';
+import { isValidPhoneNumber } from '@/components/redux/auth/helpers';
+import { showToast } from '@/components/redux/toast/toastSlice';
 
 interface LoginRegisterProps {
     authAction: AuthenticationAction;
@@ -41,7 +43,14 @@ export const LoginSignUp = ({ authAction }: LoginRegisterProps) => {
         if (method === SignUpMethod.Email) {
             signUp(email, password);
         } else {
-            setShowPhoneVerification(true);
+            if (!isValidPhoneNumber(phone)) {
+                dispatch(
+                    showToast({
+                        message: 'Please Enter a valid Phone Number and country code: +12223334444',
+                        type: 'info',
+                    })
+                );
+            } else setShowPhoneVerification(true);
         }
     };
 
@@ -75,7 +84,7 @@ export const LoginSignUp = ({ authAction }: LoginRegisterProps) => {
                     ) : (
                         <PhoneAuthInputs
                             btnText={isLogin ? 'Login' : 'Sign Up'}
-                            onSubmit={() => setShowPhoneVerification(true)}
+                            onSubmit={handleSubmit}
                             phone={phone}
                             setPhone={setPhone}
                         />

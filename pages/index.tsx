@@ -39,8 +39,6 @@ export function Home() {
         return false;
     };
     const VerificationComponent = getVerificationComponent();
-    console.log(auth);
-
     return (
         <div className={styles.container}>
             <Head>
@@ -58,6 +56,7 @@ export function Home() {
                     <h2 className="text-2xl mt-4 mb-4 font-bold text-green-900">
                         HELLO 👋👋 {auth.user?.email} -- {auth.user?.phoneNumber}
                     </h2>
+
                     <p className={styles.description}>
                         Get started by editing{` `}
                         <code className={styles.code}>pages/index.js</code>

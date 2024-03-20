@@ -63,8 +63,7 @@ export const loginWithEmail = createAsyncThunk(
 
                 try {
                     if (user) {
-                        const usercred = await linkWithCredential(user, credential);
-                        console.log('Email and password linked to the account', usercred.user);
+                        await linkWithCredential(user, credential);
 
                         if (args.callback)
                             args.callback({

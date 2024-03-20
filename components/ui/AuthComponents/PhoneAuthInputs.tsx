@@ -1,10 +1,9 @@
 import { Dispatch, SetStateAction } from 'react';
 import Input from '../Input';
-import { isMobilePhone } from 'validator';
 import LoadingButton from '../LoadingButton';
 
 interface PhoneAuthInputsProps {
-    onSubmit: () => void;
+    onSubmit: (...args: any[]) => void;
     phone: string;
     setPhone: Dispatch<SetStateAction<string>>;
     loading?: boolean;
@@ -24,7 +23,7 @@ export const PhoneAuthInputs = ({
                 <Input
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="Phone"
+                    placeholder="Phone +1123456789"
                     name="phone"
                     type="text"
                 />
@@ -32,7 +31,7 @@ export const PhoneAuthInputs = ({
                     loading={loading}
                     className="mt-4"
                     onClick={onSubmit}
-                    disabled={isMobilePhone(phone) ? false : true}
+                    disabled={phone.length < 10}
                 >
                     {btnText}
                 </LoadingButton>

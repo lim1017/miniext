@@ -1,6 +1,11 @@
 import { debugErrorMap } from 'firebase/auth';
 import { showToast } from '../toast/toastSlice';
 
+export const isValidPhoneNumber = (phoneNumber: string) => {
+    const regex = /^\+\d{1,3}\d{10}$/;
+    return regex.test(phoneNumber);
+};
+
 export const getFriendlyMessageFromFirebaseErrorCode = (errorCode: string | null) => {
     const messageFromFirebase: string | null =
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment

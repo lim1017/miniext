@@ -1,11 +1,15 @@
 import { useAppDispatch } from '../redux/store';
 import { logout } from '../redux/auth/logOut';
+import { useRouter } from 'next/navigation';
 
 export default function Logout() {
     const dispatch = useAppDispatch();
+    const router = useRouter();
+
     const loggedOut = async () => {
         try {
             dispatch(logout());
+            router.refresh();
         } catch (error) {
             console.log(error, 'error while logout');
         }

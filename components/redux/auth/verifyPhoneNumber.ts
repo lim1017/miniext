@@ -7,7 +7,7 @@ import {
     updatePhoneNumber,
     linkWithPhoneNumber,
 } from 'firebase/auth';
-import { handleError } from './helpers';
+import { handleError, isValidPhoneNumber } from './helpers';
 import { showToast } from '../toast/toastSlice';
 import { LoadingStateTypes } from '../types';
 import { AuthContextType } from '@/components/useAuth';
@@ -44,10 +44,10 @@ export const sendVerificationCode = createAsyncThunk(
             dispatch(showToast({ message: 'First Resolved the Captcha', type: 'info' }));
             return;
         }
-        if (args.phoneNumber.slice() === '' || args.phoneNumber.length < 10) {
+        if (!isValidPhoneNumber(args.phoneNumber)) {
             dispatch(
                 showToast({
-                    message: 'Enter the Phone Number and provide the country code',
+                    message: 'Please Enter a Phone Number and country code: +12223334444',
                     type: 'info',
                 })
             );
@@ -94,6 +94,7 @@ export const sendVerificationCode = createAsyncThunk(
                     });
             }
         } catch (error: any) {
+            console.log(error);
             handleError(error, dispatch, args.callback);
         }
     }

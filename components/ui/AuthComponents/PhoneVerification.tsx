@@ -30,9 +30,11 @@ interface PhoneVerificationProps {
 const PhoneVerification = ({ signUpPhone }: PhoneVerificationProps) => {
     const dispatch = useAppDispatch();
     const auth = useAuth();
+    const router = useRouter();
+
     const [phoneNumber, setPhoneNumber] = useState(signUpPhone || '');
     const [OTPCode, setOTPCode] = useState('');
-    const [show, setShow] = useState(false);
+    const [showModal, setShowModal] = useState(false);
 
     const sendVerificationLoading = useSendVerificationCodeLoading();
     const verifyPhoneNumberLoading = useVerifyPhoneNumberLoading();
@@ -40,7 +42,6 @@ const PhoneVerification = ({ signUpPhone }: PhoneVerificationProps) => {
     const [recaptcha, setRecaptcha] = useState<RecaptchaVerifier | null>(null);
     const [recaptchaResolved, setRecaptchaResolved] = useState(false);
     const [verificationId, setVerificationId] = useState('');
-    const router = useRouter();
 
     const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
 
@@ -66,7 +67,7 @@ const PhoneVerification = ({ signUpPhone }: PhoneVerificationProps) => {
                         setConfirmationResult(result.confirmationResult);
                     }
                     setVerificationId(result.verificationId);
-                    setShow(true);
+                    setShowModal(true);
                 },
             })
         );
@@ -115,7 +116,6 @@ const PhoneVerification = ({ signUpPhone }: PhoneVerificationProps) => {
 
         setRecaptcha(captcha);
     }, []);
-
     return (
         <div className="flex items-center justify-center min-h-full px-4 py-6 sm:px-6 lg:px-8">
             <div className="w-full max-w-md space-y-4">
@@ -138,7 +138,7 @@ const PhoneVerification = ({ signUpPhone }: PhoneVerificationProps) => {
                         <Logout />
                     </div>
 
-                    <Modal show={show} setShow={setShow}>
+                    <Modal show={showModal} setShow={setShowModal}>
                         <div className="max-w-xl w-full bg-white py-6 rounded-lg">
                             <h2 className="text-lg font-semibold text-center mb-10">
                                 Enter Code to Verify
