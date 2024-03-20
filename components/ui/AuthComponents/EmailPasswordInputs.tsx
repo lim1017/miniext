@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Input from '../Input';
 import LoadingButton from '../LoadingButton';
-import { isEmail } from 'validator';
+import { validateEmailPassWord } from '@/components/redux/auth/helpers';
 
 interface EmailPasswordInputProps {
     onSubmit: (email: string, password: string) => void;
@@ -31,7 +31,7 @@ export const EmailPasswordInputs = ({ onSubmit, isLoading, btnText }: EmailPassw
             />
             <LoadingButton
                 onClick={() => onSubmit(email, password)}
-                disabled={isEmail(email) && password.length >= 6 ? false : true}
+                disabled={validateEmailPassWord(email, password) !== ''}
                 loading={isLoading}
             >
                 {btnText}

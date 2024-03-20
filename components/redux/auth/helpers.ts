@@ -1,9 +1,21 @@
 import { debugErrorMap } from 'firebase/auth';
 import { showToast } from '../toast/toastSlice';
+import { isEmail } from 'validator';
 
 export const isValidPhoneNumber = (phoneNumber: string) => {
     const regex = /^\+\d{1,3}\d{10}$/;
     return regex.test(phoneNumber);
+};
+
+export const validateEmailPassWord = (email: string, password: string) => {
+    if (!isEmail(email)) {
+        return 'Enter a valid email';
+    }
+    if (password.length < 6) {
+        return 'Password should be atleast 6 characters';
+    }
+
+    return '';
 };
 
 export const getFriendlyMessageFromFirebaseErrorCode = (errorCode: string | null) => {
